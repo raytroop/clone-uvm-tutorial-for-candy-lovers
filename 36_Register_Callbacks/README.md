@@ -1,5 +1,4 @@
-http://cluelogic.com/2016/08/uvm-tutorial-for-candy-lovers-register-callbacks/
-## Using the Register Callback
+## [UUVM Tutorial for Candy Lovers – 36. Register Callbacks](http://cluelogic.com/2016/08/uvm-tutorial-for-candy-lovers-register-callbacks/)
 *In some design, when one register is written, another register takes a new value. This article will explain how to model this behavior using a register callback.*
 
 ```verilog
