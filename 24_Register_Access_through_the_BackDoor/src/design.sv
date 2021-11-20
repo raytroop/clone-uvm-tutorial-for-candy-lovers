@@ -1,9 +1,9 @@
 //==============================================================================
-// Source code for "UVM Tutorial for Candy Lovers" Post #36
+// Source code for "UVM Tutorial for Candy Lovers" Post #24
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2011-2016 ClueLogic, LLC
+// Copyright (c) 2014 ClueLogic, LLC
 // http://cluelogic.com/
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,34 +25,54 @@
 // SOFTWARE.
 //==============================================================================
 
-//------------------------------------------------------------------------------
-// Package: jelly_bean_pkg
-//------------------------------------------------------------------------------
-
-`timescale 1ns/1ns
-package jelly_bean_pkg;
-import uvm_pkg::*;
+`include "uvm_macros.svh"
+`include "jelly_bean_pkg.sv"
+`include "jelly_bean_if.sv"
 
 //------------------------------------------------------------------------------
-// Class: jelly_bean_types
+// Module: jelly_bean_taster
+//   This is the DUT.
 //------------------------------------------------------------------------------
 
-class jelly_bean_types;
-  typedef enum bit [2:0] { NO_FLAVOR, APPLE, BLUEBERRY, BUBBLE_GUM, CHOCOLATE } flavor_e;
-  typedef enum bit [1:0] { NO_COLOR, RED, GREEN, BLUE } color_e;
-  typedef enum bit [1:0] { NO_TASTE, YUMMY, YUCKY } taste_e;
-  typedef enum bit [1:0] { NO_OP = 0, READ = 1, WRITE = 2 } command_e;
-endclass: jelly_bean_types
+module jelly_bean_taster( jelly_bean_if.slave_mp jb_if );
+  import jelly_bean_pkg::*;
+  
+  reg [1:0] taste;  // TASTE  register
+  reg [2:0] flavor; // RECIPE register
+  reg [1:0] color;
+  reg       sugar_free;
+  reg       sour;
+  
+  reg [1:0] command;
 
-`include "transactions.svh"
-`include "ral.svh"
-`include "sequences.svh"
-`include "agent.svh"
-`include "env.svh"
-`include "test.svh"
-endpackage: jelly_bean_pkg
+  initial begin
+    flavor     = 0;
+    color      = 0;
+    sugar_free = 0;
+    sour       = 0;
+    command    = 0;
+    taste      = 0;
+  end
+
+  always @ ( posedge jb_if.clk ) begin
+    if ( jb_if.command == JB_WRITE ) begin
+      flavor     <= jb_if.flavor;
+      color      <= jb_if.color;
+      sugar_free <= jb_if.sugar_free;
+      sour       <= jb_if.sour;
+    end else if ( jb_if.command == JB_READ ) begin
+      jb_if.taste <= #2ns taste;
+    end
+  end
+
+  always @ ( posedge jb_if.clk ) begin
+    if ( jb_if.flavor == CHOCOLATE && jb_if.sour ) taste <= YUCKY;
+    else if ( jb_if.flavor != NO_FLAVOR )          taste <= YUMMY;
+  end
+
+endmodule: jelly_bean_taster
 
 //==============================================================================
-// Copyright (c) 2011-2016 ClueLogic, LLC
+// Copyright (c) 2014 ClueLogic, LLC
 // http://cluelogic.com/
 //==============================================================================
